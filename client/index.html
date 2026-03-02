@@ -47,8 +47,11 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            background: rgba(5, 5, 16, 0.85);
-            padding: 40px 60px;
+            background: rgba(5, 5, 16, 0.9);
+            padding: 30px 20px;
+            width: 90%;
+            max-width: 400px;
+            box-sizing: border-box;
             border-radius: 20px;
             border: 2px solid #0ff;
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
@@ -68,18 +71,18 @@
 
         h1 {
             color: #fff;
-            font-size: clamp(3rem, 8vw, 5rem);
+            font-size: clamp(2.2rem, 10vw, 5rem);
             margin: 0 0 10px 0;
             text-transform: uppercase;
-            letter-spacing: 6px;
+            letter-spacing: 4px;
             text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
         }
 
         p {
             color: #aaa;
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            margin-bottom: 30px;
-            line-height: 1.5;
+            font-size: clamp(0.85rem, 4vw, 1.2rem);
+            margin-bottom: 25px;
+            line-height: 1.4;
             max-width: 400px;
         }
 
@@ -99,8 +102,8 @@
             background: rgba(0, 255, 255, 0.1);
             color: #0ff;
             border: 2px solid #0ff;
-            padding: 15px 50px;
-            font-size: 1.5rem;
+            padding: 12px 30px;
+            font-size: 1.1rem;
             text-transform: uppercase;
             letter-spacing: 2px;
             cursor: pointer;
@@ -111,7 +114,7 @@
             font-weight: bold;
             outline: none;
             width: 100%;
-            max-width: 300px;
+            max-width: 280px;
         }
 
         button:hover, button:active {
@@ -252,14 +255,14 @@
          * ============================================
          */
         const CONFIG = {
-            PLAYER_RADIUS: 14,
-            PLAYER_SPEED: 0.12,
-            ENEMY_SPAWN_RATE_INITIAL: 1200,
-            ENEMY_SPAWN_RATE_MIN: 250,
-            ENEMY_BASE_SPEED: 2.5,
-            COLLECTIBLE_SPAWN_RATE: 2500,
-            POWERUP_SPAWN_RATE: 8000,
-            BOSS_SPAWN_SCORE: 2000,
+            PLAYER_RADIUS: 18,
+            PLAYER_SPEED: 0.15,
+            ENEMY_SPAWN_RATE_INITIAL: 1800,
+            ENEMY_SPAWN_RATE_MIN: 600,
+            ENEMY_BASE_SPEED: 1.8,
+            COLLECTIBLE_SPAWN_RATE: 2000,
+            POWERUP_SPAWN_RATE: 6000,
+            BOSS_SPAWN_SCORE: 3000,
             SCORE_PER_ORB: 100,
             COLORS: {
                 bg: '#050510',
@@ -493,6 +496,11 @@
                 }, { passive: false });
                 
                 window.addEventListener('touchstart', (e) => {
+                    if(state === 'menu' || state === 'gameover') {
+                         // Auto-start on first touch
+                         const btn = state === 'menu' ? document.getElementById('playBtn') : document.getElementById('restartBtn');
+                         btn.click();
+                    }
                     if(state === 'playing' && e.touches.length > 0) {
                         setTarget(e.touches[0].clientX, e.touches[0].clientY);
                     }
