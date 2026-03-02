@@ -1055,6 +1055,9 @@
                     ctx.fillStyle = CONFIG.COLORS.boss;
                     ctx.fillRect(boss.x - 40, boss.y - boss.radius - 20, 80 * healthPct, 6);
                 }
+
+                // Draw Enemies
+                enemies.forEach(e => {
                     ctx.save();
                     ctx.translate(e.x, e.y);
                     ctx.rotate(e.angle);
