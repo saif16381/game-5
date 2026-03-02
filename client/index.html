@@ -417,6 +417,10 @@
             <h1 style="color: #ff0055; text-shadow: 0 0 20px #ff0055;">Core Breached</h1>
             <p id="finalScoreText" style="font-size: 1.5rem; color: #fff; margin-bottom: 10px;">Final Score: 0</p>
             <p id="survivalTimeText" style="margin-bottom: 20px;">Survived for 0s</p>
+            <div id="reviveSection" style="display:none; margin-bottom: 20px; border: 1px dashed #fffb00; padding: 15px; border-radius: 10px;">
+                <p style="color: #fffb00; margin-bottom: 10px; font-size: 0.9rem;">Ad: Watch to revive with Shield!</p>
+                <button id="reviveBtn" style="background: rgba(255, 251, 0, 0.1); color: #fffb00; border-color: #fffb00;">Revive (Watch Ad)</button>
+            </div>
             <h2 id="newHighScoreMsg" style="color:#0ff; display:none; margin: 0 0 25px 0; text-shadow: 0 0 15px #0ff; text-transform: uppercase; font-size: 1.2rem; letter-spacing: 2px;">★ New High Score! ★</h2>
             <button id="restartBtn" style="margin-bottom: 20px;">Play Again</button>
             <button id="menuBtn" style="background: transparent; color: #aaa; border-color: #555; box-shadow: none;">Main Menu</button>
@@ -439,6 +443,7 @@
             POWERUP_SPAWN_RATE: 6000,
             BOSS_SPAWN_SCORE: 3000,
             SCORE_PER_ORB: 100,
+            REWARDED_AD_CHANCE: 0.3, // 30% chance for bonus chest
             COLORS: {
                 bg: '#050510',
                 grid: 'rgba(0, 255, 255, 0.05)',
@@ -617,11 +622,42 @@
             let difficultyMult = 1;
             
             // Camera / Shake
+            function triggerShake(intensity, duration) {
+                shakeIntensity = intensity;
+                shakeTime = duration;
+            }
             let shakeTime = 0;
             let shakeIntensity = 0;
 
             // Currency accumulated this run
             let sessionCurrency = 0;
+            let hasRevived = false;
+
+            function showReviveAd() {
+                const reviveSection = document.getElementById('reviveSection');
+                if (!hasRevived && score > 500) {
+                    reviveSection.style.display = 'block';
+                } else {
+                    reviveSection.style.display = 'none';
+                }
+            }
+
+            function handleRevive() {
+                // Simulate Ad Watch
+                setTimeout(() => {
+                    hasRevived = true;
+                    player.shield = 1;
+                    state = 'playing';
+                    document.getElementById('gameOverScreen').classList.remove('active-screen');
+                    document.getElementById('hud').style.display = 'flex';
+                    // Clear nearby enemies
+                    enemies = enemies.filter(e => Utils.distance(player.x, player.y, e.x, e.y) > 300);
+                    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                    lastTime = performance.now();
+                    gameLoop(lastTime);
+                }, 1000);
+            }
+
 
             // Pools & Entities
             let player = { 
@@ -885,7 +921,9 @@
 
             function gameOver() {
                 state = 'gameover';
+                showReviveAd();
                 AudioEngine.playSound('explosion');
+                            triggerShake(15, 20);
                 createExplosion(player.x, player.y, CONFIG.COLORS.player, 80, 2);
                 shakeTime = 600;
                 shakeIntensity = 20;
