@@ -47,16 +47,78 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
-            background: rgba(5, 5, 16, 0.9);
-            padding: 30px 20px;
+            background: rgba(5, 5, 16, 0.95);
+            padding: 20px;
             width: 90%;
-            max-width: 400px;
+            max-width: 450px;
+            max-height: 85vh;
+            overflow-y: auto;
             box-sizing: border-box;
             border-radius: 20px;
             border: 2px solid #0ff;
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
             pointer-events: auto;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        .shop-item {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .shop-item:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #0ff;
+        }
+
+        .shop-item.owned {
+            border-color: #0f0;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .shop-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+            color: #0ff;
+        }
+
+        .shop-item p {
+            margin: 0 0 10px 0;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+
+        .shop-item .price {
+            font-weight: bold;
+            color: #fffb00;
+            margin-bottom: 8px;
+        }
+
+        .shop-item button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            max-width: 100%;
+        }
+
+        .currency-display {
+            color: #fffb00;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 251, 0, 0.5);
+            margin-bottom: 10px;
         }
 
         .active-screen {
@@ -212,7 +274,10 @@
             <span class="stat-label">Score</span>
             <span class="stat-value" id="scoreDisplay">0</span>
         </div>
-        <div id="levelBadge">Lvl 1</div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;">
+            <div id="levelBadge">Lvl 1</div>
+            <div style="color: #fffb00; font-weight: bold; font-size: 0.8rem;" id="hudCurrency">Orbs: 0</div>
+        </div>
         <div class="stat-box" style="align-items: flex-end;">
             <span class="stat-label">Best</span>
             <span class="stat-value" id="highScoreDisplay">0</span>
@@ -225,8 +290,43 @@
         <!-- Start Screen -->
         <div id="mainMenu" class="screen active-screen">
             <h1>Neon Pulse</h1>
+            <div class="currency-display" id="menuCurrency">Energy Orbs: 0</div>
             <p>Guide your core. Collect <span class="highlight">Energy Orbs</span>. Avoid <span class="danger">Red Geometry</span>. Survive as long as you can.</p>
-            <button id="playBtn">Play Game</button>
+            <button id="playBtn" style="margin-bottom: 15px;">Play Game</button>
+            <button id="shopBtn" style="background: rgba(255, 251, 0, 0.1); color: #fffb00; border-color: #fffb00;">Enter Shop</button>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shopScreen" class="screen">
+            <h1>The Vault</h1>
+            <div class="currency-display" id="shopCurrencyDisplay">Energy Orbs: 0</div>
+            <div class="shop-grid">
+                <div class="shop-item" id="item-shield">
+                    <h3>Reflective Plating</h3>
+                    <p>Start with 1 Shield</p>
+                    <div class="price">500 Orbs</div>
+                    <button onclick="Game.buyItem('shield', 500)">Purchase</button>
+                </div>
+                <div class="shop-item" id="item-speed">
+                    <h3>Overdrive Core</h3>
+                    <p>+10% Movement Speed</p>
+                    <div class="price">750 Orbs</div>
+                    <button onclick="Game.buyItem('speed', 750)">Purchase</button>
+                </div>
+                <div class="shop-item" id="item-magnet">
+                    <h3>Ion Magnet</h3>
+                    <p>Larger Collection Radius</p>
+                    <div class="price">1000 Orbs</div>
+                    <button onclick="Game.buyItem('magnet', 1000)">Purchase</button>
+                </div>
+                <div class="shop-item" id="item-score">
+                    <h3>Data Link</h3>
+                    <p>+25% Score Multiplier</p>
+                    <div class="price">1500 Orbs</div>
+                    <button onclick="Game.buyItem('score', 1500)">Purchase</button>
+                </div>
+            </div>
+            <button id="backToMenuBtn">Back to Menu</button>
         </div>
 
         <!-- Pause Screen -->
@@ -290,6 +390,26 @@
             random: (min, max) => Math.random() * (max - min) + min,
             randomInt: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
             lerp: (start, end, amt) => (1 - amt) * start + amt * end,
+            getCurrency: () => parseInt(localStorage.getItem('neonPulseCurrency')) || 0,
+            addCurrency: (amount) => {
+                const current = Utils.getCurrency();
+                localStorage.setItem('neonPulseCurrency', current + amount);
+                return current + amount;
+            },
+            subtractCurrency: (amount) => {
+                const current = Utils.getCurrency();
+                if (current >= amount) {
+                    localStorage.setItem('neonPulseCurrency', current - amount);
+                    return true;
+                }
+                return false;
+            },
+            getUpgrades: () => JSON.parse(localStorage.getItem('neonPulseUpgrades')) || {},
+            addUpgrade: (id) => {
+                const upgrades = Utils.getUpgrades();
+                upgrades[id] = true;
+                localStorage.setItem('neonPulseUpgrades', JSON.stringify(upgrades));
+            },
             saveScore: (score) => {
                 try {
                     const high = localStorage.getItem('neonPulseHigh');
@@ -424,6 +544,9 @@
             // Camera / Shake
             let shakeTime = 0;
             let shakeIntensity = 0;
+
+            // Currency accumulated this run
+            let sessionCurrency = 0;
 
             // Pools & Entities
             let player = { 
@@ -652,6 +775,12 @@
                 player.radius = CONFIG.PLAYER_RADIUS;
                 player.speedBoost = 0;
                 player.baseSpeed = CONFIG.PLAYER_SPEED;
+
+                // Apply Upgrades
+                const upgrades = Utils.getUpgrades();
+                if (upgrades.shield) player.shield = 5000;
+                if (upgrades.speed) player.baseSpeed *= 1.1;
+                if (upgrades.magnet) { /* handled in collectible logic */ }
                 
                 updateScoreUI();
                 document.getElementById('highScoreDisplay').innerText = Utils.getHighScore();
@@ -686,6 +815,9 @@
                 shakeTime = 600;
                 shakeIntensity = 20;
                 
+                // Add session currency to total
+                Utils.addCurrency(sessionCurrency);
+                
                 const isHigh = Utils.saveScore(score);
                 document.getElementById('finalScoreText').innerText = `Final Score: ${score}`;
                 document.getElementById('survivalTimeText').innerText = `Survived for ${Utils.formatTime(totalPlayTime)}`;
@@ -718,29 +850,33 @@
              * ============================================
              */
             function update(dt) {
-                // Background animation in menu
-                if (state === 'menu') {
-                    enemies.forEach(e => {
-                        e.angle += e.rotSpeed;
-                        e.x += Math.cos(e.angle) * e.speed * (dt/16);
-                        e.y += Math.sin(e.angle) * e.speed * (dt/16);
-                        // Wrap around
-                        if(e.x < -50) e.x = width + 50;
-                        if(e.x > width + 50) e.x = -50;
-                        if(e.y < -50) e.y = height + 50;
-                        if(e.y > height + 50) e.y = -50;
-                    });
+                if (state !== 'playing' && state !== 'gameover') {
+                    // Background animation in menu
+                    if (state === 'menu') {
+                        enemies.forEach(e => {
+                            e.angle += e.rotSpeed;
+                            e.x += Math.cos(e.angle) * e.speed * (dt/16);
+                            e.y += Math.sin(e.angle) * e.speed * (dt/16);
+                            if(e.x < -50) e.x = width + 50;
+                            if(e.x > width + 50) e.x = -50;
+                            if(e.y < -50) e.y = height + 50;
+                            if(e.y > height + 50) e.y = -50;
+                        });
+                    }
                     return;
                 }
-
-                if (state !== 'playing' && state !== 'gameover') return;
 
                 // Screen Shake decay
                 if (shakeTime > 0) shakeTime -= dt;
 
                 if (state === 'playing') {
                     totalPlayTime += dt;
-                    // Increase difficulty over time: 10% faster every 15 seconds
+                    
+                    // Update session currency
+                    sessionCurrency = Math.floor(score / 10);
+                    const hudCurrency = document.getElementById('hudCurrency');
+                    if (hudCurrency) hudCurrency.innerText = `Orbs: ${Utils.getCurrency() + sessionCurrency}`;
+
                     difficultyMult = 1 + (totalPlayTime / 15000) * 0.15;
 
                     // Update player powers
@@ -835,8 +971,11 @@
                         }
                         
                         // Collision with player
-                        if (Utils.distance(player.x, player.y, c.x, c.y) < player.radius + c.radius) {
-                            score += CONFIG.SCORE_PER_ORB;
+                        const collectRadius = Utils.getUpgrades().magnet ? player.radius + c.radius + 40 : player.radius + c.radius;
+                        if (Utils.distance(player.x, player.y, c.x, c.y) < collectRadius) {
+                            let orbValue = CONFIG.SCORE_PER_ORB;
+                            if (Utils.getUpgrades().score) orbValue = Math.floor(orbValue * 1.25);
+                            score += orbValue;
                             player.xp++;
                             if (player.xp >= player.xpToNext) {
                                 player.level++;
@@ -1195,6 +1334,30 @@
             }
 
             return {
+                buyItem: (id, price) => {
+                    const upgrades = Utils.getUpgrades();
+                    if (upgrades[id]) return;
+                    if (Utils.subtractCurrency(price)) {
+                        Utils.addUpgrade(id);
+                        Game.updateShopUI();
+                        AudioEngine.playSound('collect');
+                    }
+                },
+                updateShopUI: () => {
+                    const orbs = Utils.getCurrency();
+                    document.getElementById('shopCurrencyDisplay').innerText = `Energy Orbs: ${orbs}`;
+                    document.getElementById('menuCurrency').innerText = `Energy Orbs: ${orbs}`;
+                    
+                    const upgrades = Utils.getUpgrades();
+                    ['shield', 'speed', 'magnet', 'score'].forEach(id => {
+                        const item = document.getElementById(`item-${id}`);
+                        if (upgrades[id]) {
+                            item.classList.add('owned');
+                            item.querySelector('button').innerText = 'Owned';
+                            item.querySelector('button').disabled = true;
+                        }
+                    });
+                },
                 init: () => {
                     resize();
                     initInput();
@@ -1203,16 +1366,29 @@
                     document.getElementById('playBtn').addEventListener('click', start);
                     document.getElementById('restartBtn').addEventListener('click', start);
                     document.getElementById('resumeBtn').addEventListener('click', resumeGame);
+                    document.getElementById('shopBtn').addEventListener('click', () => {
+                        Game.updateShopUI();
+                        showScreen('shopScreen');
+                    });
+                    document.getElementById('backToMenuBtn').addEventListener('click', () => {
+                        showScreen('mainMenu');
+                    });
                     
                     const toMenu = () => {
                         state = 'menu';
                         showScreen('mainMenu');
                         resize(); // Respawn background decorations
+                        const orbs = Utils.getCurrency();
+                        document.getElementById('menuCurrency').innerText = `Energy Orbs: ${orbs}`;
                     };
                     
                     document.getElementById('quitBtn').addEventListener('click', toMenu);
                     document.getElementById('menuBtn').addEventListener('click', toMenu);
                     
+                    // Initialize currency display
+                    const orbs = Utils.getCurrency();
+                    document.getElementById('menuCurrency').innerText = `Energy Orbs: ${orbs}`;
+
                     // Start ambient menu loop
                     lastTime = performance.now();
                     animationFrameId = requestAnimationFrame(gameLoop);
