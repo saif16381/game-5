@@ -1,15 +1,958 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&family=Oxanium:wght@200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Pulse - Arcade Survival</title>
+    <style>
+        /* ============================================ */
+        /* SECTION: CSS STYLES                          */
+        /* ============================================ */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050510;
+            overflow: hidden;
+            touch-action: none; /* Prevent pinch zoom, scroll on mobile */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        #uiLayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: rgba(5, 5, 16, 0.85);
+            padding: 40px 60px;
+            border-radius: 20px;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        .active-screen {
+            display: flex;
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        h1 {
+            color: #fff;
+            font-size: clamp(3rem, 8vw, 5rem);
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+        }
+
+        p {
+            color: #aaa;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 30px;
+            line-height: 1.5;
+            max-width: 400px;
+        }
+
+        .highlight {
+            color: #0ff;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+        }
+
+        .danger {
+            color: #ff0055;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 0, 85, 0.5);
+        }
+
+        button {
+            background: rgba(0, 255, 255, 0.1);
+            color: #0ff;
+            border: 2px solid #0ff;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2) inset, 0 0 15px rgba(0, 255, 255, 0.2);
+            font-family: inherit;
+            font-weight: bold;
+            outline: none;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button:hover, button:active {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6) inset, 0 0 40px rgba(0, 255, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            padding: 0 30px;
+            box-sizing: border-box;
+            color: #fff;
+            pointer-events: none;
+            display: none;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 5;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #0ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #0ff;
+            line-height: 1;
+        }
+
+        #mobileControlsHint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1rem;
+            letter-spacing: 1px;
+            pointer-events: none;
+            display: none;
+            animation: pulseText 2s infinite;
+        }
+
+        @keyframes pulseText {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================ -->
+    <!-- SECTION: HTML STRUCTURE                      -->
+    <!-- ============================================ -->
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="hud">
+        <div class="stat-box">
+            <span class="stat-label">Score</span>
+            <span class="stat-value" id="scoreDisplay">0</span>
+        </div>
+        <div class="stat-box" style="align-items: flex-end;">
+            <span class="stat-label">Best</span>
+            <span class="stat-value" id="highScoreDisplay">0</span>
+        </div>
+    </div>
+
+    <div id="mobileControlsHint">Drag anywhere to move</div>
+
+    <div id="uiLayer">
+        <!-- Start Screen -->
+        <div id="mainMenu" class="screen active-screen">
+            <h1>Neon Pulse</h1>
+            <p>Guide your core. Collect <span class="highlight">Energy Orbs</span>. Avoid <span class="danger">Red Geometry</span>. Survive as long as you can.</p>
+            <button id="playBtn">Play Game</button>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pauseScreen" class="screen">
+            <h1>Paused</h1>
+            <p>Take a breath. The swarm awaits.</p>
+            <button id="resumeBtn" style="margin-bottom: 20px;">Resume</button>
+            <button id="quitBtn" style="background: transparent; color: #aaa; border-color: #555; box-shadow: none;">Quit to Menu</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen">
+            <h1 style="color: #ff0055; text-shadow: 0 0 20px #ff0055;">Core Breached</h1>
+            <p id="finalScoreText" style="font-size: 1.5rem; color: #fff; margin-bottom: 10px;">Final Score: 0</p>
+            <p id="survivalTimeText" style="margin-bottom: 20px;">Survived for 0s</p>
+            <h2 id="newHighScoreMsg" style="color:#0ff; display:none; margin: 0 0 25px 0; text-shadow: 0 0 15px #0ff; text-transform: uppercase; font-size: 1.2rem; letter-spacing: 2px;">★ New High Score! ★</h2>
+            <button id="restartBtn" style="margin-bottom: 20px;">Play Again</button>
+            <button id="menuBtn" style="background: transparent; color: #aaa; border-color: #555; box-shadow: none;">Main Menu</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ============================================
+         * SECTION: JAVASCRIPT — CONFIGURATION
+         * ============================================
+         */
+        const CONFIG = {
+            PLAYER_RADIUS: 14,
+            PLAYER_SPEED: 0.12, // Lerp smoothing factor for movement
+            ENEMY_SPAWN_RATE_INITIAL: 1200,
+            ENEMY_SPAWN_RATE_MIN: 250,
+            ENEMY_BASE_SPEED: 2.5,
+            COLLECTIBLE_SPAWN_RATE: 2500,
+            SCORE_PER_ORB: 100,
+            COLORS: {
+                bg: '#050510',
+                grid: 'rgba(0, 255, 255, 0.05)',
+                player: '#00ffff',
+                playerCore: '#ffffff',
+                enemy: '#ff0055',
+                enemyFill: 'rgba(255, 0, 85, 0.2)',
+                collectible: '#00ffaa',
+                particleTrail: 'rgba(0, 255, 255, 0.4)'
+            }
+        };
+
+        /**
+         * ============================================
+         * SECTION: JAVASCRIPT — UTILITY FUNCTIONS
+         * ============================================
+         */
+        const Utils = {
+            distance: (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1),
+            random: (min, max) => Math.random() * (max - min) + min,
+            randomInt: (min, max) => Math.floor(Math.random() * (max - min + 1)) + min,
+            lerp: (start, end, amt) => (1 - amt) * start + amt * end,
+            saveScore: (score) => {
+                try {
+                    const high = localStorage.getItem('neonPulseHigh');
+                    if (!high || score > parseInt(high, 10)) {
+                        localStorage.setItem('neonPulseHigh', score.toString());
+                        return true;
+                    }
+                } catch(e) { /* Ignore Safari private mode errors */ }
+                return false;
+            },
+            getHighScore: () => {
+                try {
+                    return parseInt(localStorage.getItem('neonPulseHigh'), 10) || 0;
+                } catch(e) { return 0; }
+            },
+            formatTime: (ms) => {
+                const totalSeconds = Math.floor(ms / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes > 0 ? minutes + 'm ' : ''}${seconds}s`;
+            },
+            isMobile: () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        };
+
+        /**
+         * ============================================
+         * SECTION: JAVASCRIPT — AUDIO ENGINE
+         * ============================================
+         */
+        const AudioEngine = (function() {
+            let ctx = null;
+            let enabled = false;
+
+            function init() {
+                if (ctx) return;
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    ctx = new AudioContext();
+                    enabled = true;
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
+            }
+
+            function playSound(type) {
+                if (!enabled || !ctx) return;
+                if (ctx.state === 'suspended') ctx.resume();
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'collect') {
+                    // Sweet chime
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, now);
+                    osc.frequency.exponentialRampToValueAtTime(1760, now + 0.1);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'explosion') {
+                    // Deep crunch / impact
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(10, now + 0.4);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    
+                    // Add noise component for better explosion
+                    const bufferSize = ctx.sampleRate * 0.4;
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const noiseFilter = ctx.createBiquadFilter();
+                    noiseFilter.type = 'lowpass';
+                    noiseFilter.frequency.setValueAtTime(1000, now);
+                    noiseFilter.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+                    const noiseGain = ctx.createGain();
+                    noiseGain.gain.setValueAtTime(0.4, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    
+                    noise.connect(noiseFilter);
+                    noiseFilter.connect(noiseGain);
+                    noiseGain.connect(ctx.destination);
+                    
+                    noise.start(now);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'start') {
+                    // Upward sweep
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(880, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            }
+
+            return { init, playSound };
+        })();
+
+        /**
+         * ============================================
+         * SECTION: JAVASCRIPT — MAIN GAME LOOP
+         * ============================================
+         */
+        const Game = (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d', { alpha: false });
+            
+            let width, height;
+            let state = 'menu'; // menu, playing, paused, gameover
+            let lastTime = 0;
+            let animationFrameId;
+            
+            // Game State
+            let score = 0;
+            let totalPlayTime = 0;
+            let difficultyMult = 1;
+            
+            // Camera / Shake
+            let shakeTime = 0;
+            let shakeIntensity = 0;
+
+            // Pools & Entities
+            let player = { x: 0, y: 0, targetX: 0, targetY: 0, radius: CONFIG.PLAYER_RADIUS };
+            let enemies = [];
+            let collectibles = [];
+            let particles = [];
+            
+            // Spawning Timers
+            let enemyTimer = 0;
+            let collectibleTimer = 0;
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                
+                if (state === 'menu') {
+                    player.x = width / 2;
+                    player.y = height / 2;
+                    player.targetX = width / 2;
+                    player.targetY = height / 2;
+                    spawnBackgroundDecorations();
+                }
+            }
+
+            function spawnBackgroundDecorations() {
+                enemies = [];
+                for(let i=0; i<15; i++) {
+                    enemies.push(createEnemy(Utils.random(0, width), Utils.random(0, height), true));
+                }
+            }
+
+            /**
+             * ============================================
+             * SECTION: JAVASCRIPT — INPUT HANDLING
+             * ============================================
+             */
+            function initInput() {
+                window.addEventListener('resize', resize);
+                
+                const setTarget = (clientX, clientY) => {
+                    if (state !== 'playing') return;
+                    player.targetX = clientX;
+                    player.targetY = clientY;
+                };
+
+                // Mouse
+                window.addEventListener('mousemove', (e) => setTarget(e.clientX, e.clientY));
+                
+                // Touch - prevent default to stop scrolling/zooming
+                window.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if(e.touches.length > 0) setTarget(e.touches[0].clientX, e.touches[0].clientY);
+                }, { passive: false });
+                
+                window.addEventListener('touchstart', (e) => {
+                    if(state === 'playing' && e.touches.length > 0) {
+                        setTarget(e.touches[0].clientX, e.touches[0].clientY);
+                    }
+                }, { passive: false });
+
+                // Keyboard
+                window.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+                        if (state === 'playing') pauseGame();
+                        else if (state === 'paused') resumeGame();
+                    }
+                });
+
+                if (Utils.isMobile()) {
+                    document.getElementById('mobileControlsHint').style.display = 'block';
+                }
+            }
+
+            /**
+             * ============================================
+             * SECTION: JAVASCRIPT — GAME ENTITIES
+             * ============================================
+             */
+            function createEnemy(x, y, isDecorative = false) {
+                const size = Utils.randomInt(12, 22);
+                const speed = isDecorative ? Utils.random(0.5, 1) : CONFIG.ENEMY_BASE_SPEED * difficultyMult * Utils.random(0.8, 1.3);
+                return {
+                    x: x, 
+                    y: y, 
+                    radius: size, 
+                    speed: speed, 
+                    angle: Utils.random(0, Math.PI * 2), 
+                    rotSpeed: Utils.random(-0.1, 0.1),
+                    vertices: Utils.randomInt(3, 5),
+                    isDecorative: isDecorative
+                };
+            }
+
+            function spawnEnemy() {
+                // Spawn just outside the viewport
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.max(width, height) / 2 + 50;
+                const ex = width/2 + Math.cos(angle) * dist;
+                const ey = height/2 + Math.sin(angle) * dist;
+                
+                enemies.push(createEnemy(ex, ey));
+            }
+
+            function spawnCollectible() {
+                collectibles.push({
+                    x: Utils.random(50, width - 50),
+                    y: Utils.random(50, height - 50),
+                    radius: 8,
+                    life: 6000, // 6 seconds before disappearing
+                    maxLife: 6000
+                });
+            }
+
+            /**
+             * ============================================
+             * SECTION: JAVASCRIPT — PARTICLE SYSTEM
+             * ============================================
+             */
+            function createExplosion(x, y, color, count, speedMult = 1) {
+                for(let i=0; i<count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Utils.random(1, 6) * speedMult;
+                    particles.push({
+                        x: x, y: y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        radius: Utils.random(2, 5),
+                        color: color,
+                        life: 1,
+                        decay: Utils.random(0.015, 0.04)
+                    });
+                }
+            }
+
+            function createTrail(x, y) {
+                particles.push({
+                    x: x + Utils.random(-5, 5), 
+                    y: y + Utils.random(-5, 5),
+                    vx: 0, vy: 0,
+                    radius: Utils.random(2, 4),
+                    color: CONFIG.COLORS.particleTrail,
+                    life: 0.5,
+                    decay: 0.05
+                });
+            }
+
+            /**
+             * ============================================
+             * SECTION: JAVASCRIPT — GAME STATE MANAGEMENT
+             * ============================================
+             */
+            function start() {
+                AudioEngine.init();
+                AudioEngine.playSound('start');
+                
+                score = 0;
+                totalPlayTime = 0;
+                difficultyMult = 1;
+                enemies = [];
+                collectibles = [];
+                particles = [];
+                
+                // Start player in center
+                player.x = width / 2;
+                player.y = height / 2;
+                player.targetX = width / 2;
+                player.targetY = height / 2;
+                
+                updateScoreUI();
+                document.getElementById('highScoreDisplay').innerText = Utils.getHighScore();
+                
+                showScreen(null);
+                document.getElementById('hud').style.display = 'flex';
+                if(Utils.isMobile()) document.getElementById('mobileControlsHint').style.display = 'block';
+                
+                state = 'playing';
+                lastTime = performance.now();
+                if (!animationFrameId) animationFrameId = requestAnimationFrame(gameLoop);
+            }
+
+            function pauseGame() {
+                state = 'paused';
+                showScreen('pauseScreen');
+                document.getElementById('hud').style.opacity = '0.5';
+            }
+
+            function resumeGame() {
+                state = 'playing';
+                showScreen(null);
+                document.getElementById('hud').style.opacity = '1';
+                lastTime = performance.now();
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+
+            function gameOver() {
+                state = 'gameover';
+                AudioEngine.playSound('explosion');
+                createExplosion(player.x, player.y, CONFIG.COLORS.player, 80, 2);
+                shakeTime = 600;
+                shakeIntensity = 20;
+                
+                const isHigh = Utils.saveScore(score);
+                document.getElementById('finalScoreText').innerText = `Final Score: ${score}`;
+                document.getElementById('survivalTimeText').innerText = `Survived for ${Utils.formatTime(totalPlayTime)}`;
+                document.getElementById('newHighScoreMsg').style.display = isHigh && score > 0 ? 'block' : 'none';
+                
+                document.getElementById('hud').style.display = 'none';
+                document.getElementById('mobileControlsHint').style.display = 'none';
+                
+                // Slight delay before showing menu so player sees explosion
+                setTimeout(() => {
+                    showScreen('gameOverScreen');
+                }, 1200);
+            }
+
+            function showScreen(id) {
+                document.querySelectorAll('.screen').forEach(el => el.classList.remove('active-screen'));
+                if (id) document.getElementById(id).classList.add('active-screen');
+            }
+
+            function updateScoreUI() {
+                document.getElementById('scoreDisplay').innerText = score;
+            }
+
+            /**
+             * ============================================
+             * SECTION: JAVASCRIPT — UPDATE LOGIC
+             * ============================================
+             */
+            function update(dt) {
+                // Background animation in menu
+                if (state === 'menu') {
+                    enemies.forEach(e => {
+                        e.angle += e.rotSpeed;
+                        e.x += Math.cos(e.angle) * e.speed * (dt/16);
+                        e.y += Math.sin(e.angle) * e.speed * (dt/16);
+                        // Wrap around
+                        if(e.x < -50) e.x = width + 50;
+                        if(e.x > width + 50) e.x = -50;
+                        if(e.y < -50) e.y = height + 50;
+                        if(e.y > height + 50) e.y = -50;
+                    });
+                    return;
+                }
+
+                if (state !== 'playing' && state !== 'gameover') return;
+
+                // Screen Shake decay
+                if (shakeTime > 0) shakeTime -= dt;
+
+                if (state === 'playing') {
+                    totalPlayTime += dt;
+                    // Increase difficulty over time: 10% faster every 15 seconds
+                    difficultyMult = 1 + (totalPlayTime / 15000) * 0.15;
+
+                    // Move Player smoothly towards target
+                    const dxPlayer = player.targetX - player.x;
+                    const dyPlayer = player.targetY - player.y;
+                    
+                    player.x += dxPlayer * CONFIG.PLAYER_SPEED * (dt/16);
+                    player.y += dyPlayer * CONFIG.PLAYER_SPEED * (dt/16);
+                    
+                    // Emit trail if moving fast enough
+                    if (Math.hypot(dxPlayer, dyPlayer) > 5 && Math.random() > 0.5) {
+                        createTrail(player.x, player.y);
+                    }
+                    
+                    // Constrain player to screen bounds
+                    player.x = Math.max(player.radius, Math.min(width - player.radius, player.x));
+                    player.y = Math.max(player.radius, Math.min(height - player.radius, player.y));
+
+                    // Hide mobile hint once player moves
+                    if (totalPlayTime > 2000 && Math.hypot(dxPlayer, dyPlayer) > 10) {
+                        document.getElementById('mobileControlsHint').style.display = 'none';
+                    }
+
+                    // Spawning Logic
+                    enemyTimer += dt;
+                    const currentSpawnRate = Math.max(CONFIG.ENEMY_SPAWN_RATE_MIN, CONFIG.ENEMY_SPAWN_RATE_INITIAL / difficultyMult);
+                    if (enemyTimer > currentSpawnRate) {
+                        spawnEnemy();
+                        enemyTimer = 0;
+                    }
+
+                    collectibleTimer += dt;
+                    if (collectibleTimer > CONFIG.COLLECTIBLE_SPAWN_RATE) {
+                        spawnCollectible();
+                        collectibleTimer = 0;
+                    }
+
+                    // Collectibles Logic
+                    for (let i = collectibles.length - 1; i >= 0; i--) {
+                        let c = collectibles[i];
+                        c.life -= dt;
+                        
+                        if (c.life <= 0) {
+                            // Fade out particle effect
+                            createExplosion(c.x, c.y, '#555', 5, 0.5);
+                            collectibles.splice(i, 1);
+                            continue;
+                        }
+                        
+                        // Collision with player
+                        if (Utils.distance(player.x, player.y, c.x, c.y) < player.radius + c.radius) {
+                            score += CONFIG.SCORE_PER_ORB;
+                            updateScoreUI();
+                            AudioEngine.playSound('collect');
+                            createExplosion(c.x, c.y, CONFIG.COLORS.collectible, 15);
+                            collectibles.splice(i, 1);
+                        }
+                    }
+
+                    // Enemies Logic
+                    for (let i = enemies.length - 1; i >= 0; i--) {
+                        let e = enemies[i];
+                        
+                        // Seek player
+                        const dx = player.x - e.x;
+                        const dy = player.y - e.y;
+                        const dist = Math.hypot(dx, dy);
+                        
+                        if (dist > 0) {
+                            e.x += (dx / dist) * e.speed * (dt/16);
+                            e.y += (dy / dist) * e.speed * (dt/16);
+                        }
+                        
+                        e.angle += e.rotSpeed * (dt/16);
+
+                        // Collision with player
+                        // Make hitbox slightly forgiving (subtract 3)
+                        if (dist < player.radius + e.radius - 3) {
+                            gameOver();
+                            break;
+                        }
+                    }
+                }
+
+                // Particles Logic (always update even in gameover)
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    let p = particles[i];
+                    p.x += p.vx * (dt/16);
+                    p.y += p.vy * (dt/16);
+                    p.life -= p.decay * (dt/16);
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+            }
+
+            /**
+             * ============================================
+             * SECTION: JAVASCRIPT — RENDERING ENGINE
+             * ============================================
+             */
+            function draw() {
+                // Solid Background
+                ctx.fillStyle = CONFIG.COLORS.bg;
+                ctx.fillRect(0, 0, width, height);
+
+                ctx.save();
+                
+                // Screen Shake Application
+                if (shakeTime > 0) {
+                    const progress = shakeTime / 600; // normalized 0-1
+                    const dx = Utils.random(-shakeIntensity, shakeIntensity) * progress;
+                    const dy = Utils.random(-shakeIntensity, shakeIntensity) * progress;
+                    ctx.translate(dx, dy);
+                }
+
+                // Draw Grid (Cyberpunk style)
+                ctx.strokeStyle = CONFIG.COLORS.grid;
+                ctx.lineWidth = 1;
+                const gridSize = 60;
+                
+                // Offset grid based on player position for parallax effect
+                const offsetX = (player.x * -0.05) % gridSize;
+                const offsetY = (player.y * -0.05) % gridSize;
+                
+                ctx.beginPath();
+                for(let x = offsetX; x < width; x += gridSize) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+                for(let y = offsetY; y < height; y += gridSize) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
+                ctx.stroke();
+
+                // Add bloom/glow to drawn elements
+                ctx.globalCompositeOperation = 'screen';
+
+                // Draw Particles
+                particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, Math.max(0.1, p.radius * p.life), 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 10 * p.life;
+                    ctx.fill();
+                });
+
+                // Draw Collectibles
+                collectibles.forEach(c => {
+                    const lifeRatio = c.life / c.maxLife;
+                    // Blink faster as life runs out
+                    const blink = lifeRatio < 0.3 ? Math.sin(performance.now() * 0.02) > 0 : true;
+                    
+                    if (blink) {
+                        ctx.beginPath();
+                        ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = CONFIG.COLORS.collectible;
+                        ctx.shadowColor = CONFIG.COLORS.collectible;
+                        ctx.shadowBlur = 15;
+                        ctx.fill();
+                        
+                        // Outer pulse ring
+                        const pulse = 1 + Math.sin(performance.now() * 0.005) * 0.3;
+                        ctx.beginPath();
+                        ctx.arc(c.x, c.y, c.radius * pulse * 1.8, 0, Math.PI * 2);
+                        ctx.strokeStyle = `rgba(0, 255, 170, ${lifeRatio})`;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                });
+
+                // Draw Enemies
+                enemies.forEach(e => {
+                    ctx.save();
+                    ctx.translate(e.x, e.y);
+                    ctx.rotate(e.angle);
+                    
+                    ctx.beginPath();
+                    for(let j=0; j<e.vertices; j++) {
+                        const a = (j / e.vertices) * Math.PI * 2;
+                        const px = Math.cos(a) * e.radius;
+                        const py = Math.sin(a) * e.radius;
+                        if(j===0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    
+                    // Throbbing effect
+                    const throb = 1 + Math.sin(performance.now() * 0.01 + e.x) * 0.1;
+                    ctx.scale(throb, throb);
+                    
+                    ctx.strokeStyle = CONFIG.COLORS.enemy;
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowColor = CONFIG.COLORS.enemy;
+                    ctx.shadowBlur = e.isDecorative ? 5 : 15;
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = CONFIG.COLORS.enemyFill;
+                    ctx.fill();
+                    
+                    // Core point
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 3, 0, Math.PI*2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                    
+                    ctx.restore();
+                });
+
+                // Draw Player
+                if (state !== 'gameover' && state !== 'menu') {
+                    // Draw tether to cursor
+                    ctx.beginPath();
+                    ctx.moveTo(player.x, player.y);
+                    ctx.lineTo(player.targetX, player.targetY);
+                    
+                    // Tether fades based on distance
+                    const dist = Utils.distance(player.x, player.y, player.targetX, player.targetY);
+                    const tetherOpacity = Math.max(0, 0.4 - (dist / 1000));
+                    
+                    ctx.strokeStyle = `rgba(0, 255, 255, ${tetherOpacity})`;
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]); // dashed line
+                    ctx.stroke();
+                    ctx.setLineDash([]); // reset
+
+                    // Outer shield/ring
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = CONFIG.COLORS.player;
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = CONFIG.COLORS.player;
+                    ctx.shadowBlur = 20;
+                    ctx.stroke();
+                    
+                    // Inner core
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, player.radius * 0.4, 0, Math.PI * 2);
+                    ctx.fillStyle = CONFIG.COLORS.playerCore;
+                    ctx.shadowBlur = 10;
+                    ctx.fill();
+                    
+                    // Rotating indicator rings
+                    const time = performance.now() * 0.002;
+                    ctx.save();
+                    ctx.translate(player.x, player.y);
+                    ctx.rotate(time);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, player.radius * 1.5, 0, Math.PI);
+                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                ctx.restore();
+            }
+
+            function gameLoop(time) {
+                if (!lastTime) lastTime = time;
+                const dt = time - lastTime;
+                lastTime = time;
+                
+                // Cap dt to prevent massive physics jumps when tab is backgrounded
+                const cappedDt = Math.min(dt, 50);
+
+                update(cappedDt);
+                draw();
+
+                // Always loop, even in menu, to run background animations
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+
+            return {
+                init: () => {
+                    resize();
+                    initInput();
+                    
+                    // Bind UI Buttons
+                    document.getElementById('playBtn').addEventListener('click', start);
+                    document.getElementById('restartBtn').addEventListener('click', start);
+                    document.getElementById('resumeBtn').addEventListener('click', resumeGame);
+                    
+                    const toMenu = () => {
+                        state = 'menu';
+                        showScreen('mainMenu');
+                        resize(); // Respawn background decorations
+                    };
+                    
+                    document.getElementById('quitBtn').addEventListener('click', toMenu);
+                    document.getElementById('menuBtn').addEventListener('click', toMenu);
+                    
+                    // Start ambient menu loop
+                    lastTime = performance.now();
+                    animationFrameId = requestAnimationFrame(gameLoop);
+                }
+            };
+        })();
+
+        // ============================================
+        // SECTION: INITIALIZATION
+        // ============================================
+        window.addEventListener('DOMContentLoaded', () => {
+            Game.init();
+        });
+    </script>
+</body>
 </html>
