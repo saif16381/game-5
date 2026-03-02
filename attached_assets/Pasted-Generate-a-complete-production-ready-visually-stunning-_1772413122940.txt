@@ -1,0 +1,247 @@
+Generate a complete, production-ready, visually stunning, and highly addictive browser game as a single self-contained index.html file (to be placed in a /client folder). The game must be one of the best and most unique single-file browser games ever created — not a clone, not a basic tutorial project, but a genuinely polished, creative, retention-optimized game that fully complies with CrazyGames Basic Launch Requirements and is ready for immediate submission and approval.
+
+🔧 SECTION 1: TECHNICAL & PLATFORM REQUIREMENTS
+File Structure:
+
+Everything must be inside ONE single index.html file — all HTML, CSS, and JavaScript combined inline.
+No separate files. No asset folders. No manifest files. No service workers.
+Initial file size must be under 50MB (target under 5MB for fast loading).
+The file must be fully functional when opened directly in a browser (file:// protocol) AND when served from any web server or iframe embed.
+Zero External Dependencies:
+
+Absolutely NO external CDNs, APIs, libraries, frameworks, or third-party scripts (no Phaser, no Three.js, no p5.js, no jQuery, no GSAP, no Howler.js, no Firebase, no Analytics, no nothing).
+All game logic, rendering, physics, audio, UI, and animation must be written from scratch using vanilla HTML5, CSS3, and ES6+ JavaScript.
+All graphics must be generated programmatically using Canvas 2D API, SVG inline, or CSS-drawn elements — no external image files, no base64-encoded images over 10KB, no sprite sheet URLs.
+All sound effects must be generated at runtime using the Web Audio API (OscillatorNode, GainNode, BiquadFilterNode, etc.) — no external audio files, no base64 audio.
+All fonts must be system fonts (e.g., Arial, Verdana, Georgia, 'Segoe UI', monospace) or CSS-defined @font-face using inline data URIs only if absolutely necessary and small.
+Advertising & Monetization:
+
+No external ads of any kind (no ad scripts, no ad placeholders, no ad-related code).
+No in-app purchases, no paywalls, no premium locks.
+No cryptocurrency, blockchain, or NFT references.
+Authentication & Privacy:
+
+No external login systems, authentication, OAuth, or social media sign-in.
+No data collection, cookies for tracking, or analytics scripts.
+No localStorage abuse — if localStorage is used (e.g., for high scores), it must be wrapped in a try/catch and fail gracefully if unavailable.
+No mention of Terms & Conditions, Privacy Policy, GDPR notices, or legal text inside the game.
+Domain & Embedding Compatibility:
+
+Must run correctly on ALL CrazyGames domains (crazygames.com, www.crazygames.com, builds.crazygames.com, and any subdomains) — no hardcoded domain checks or restrictions.
+Must be fully functional when embedded inside an <iframe> (the primary CrazyGames delivery method).
+No X-Frame-Options or CSP headers that would block iframe embedding.
+No window.top checks, no frame-busting scripts, no parent window access.
+No popups (window.open), no redirects (window.location), no forced navigation, no alert(), no confirm(), no prompt().
+Browser Compatibility:
+
+Must work flawlessly on latest versions of: Google Chrome, Microsoft Edge, Mozilla Firefox, Safari, Opera, and Brave.
+Must work on both desktop and mobile browsers (iOS Safari, Android Chrome).
+Use only widely-supported Web APIs — no experimental or prefixed features.
+Test-ready for WebGL fallback to Canvas 2D if WebGL is used.
+No document.write(), no eval(), no deprecated APIs.
+Responsive & Mobile Design:
+
+Fully responsive layout that adapts to any screen size from 320px wide phones to 4K monitors.
+Game canvas must dynamically resize on window resize and orientation change using window.addEventListener('resize', ...) and orientationchange.
+Proper <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> tag.
+Touch controls required for mobile: implement virtual joystick, touch buttons, swipe detection, and/or tap controls as appropriate for the game genre.
+Must support both portrait and landscape orientations (or gracefully show a rotation prompt if one orientation is required).
+No hover-dependent gameplay mechanics (hover can enhance but must not be required).
+Prevent default touch behaviors that interfere with gameplay (pinch zoom, scroll, pull-to-refresh) using touch-action: none and preventDefault() on relevant events.
+Console Cleanliness:
+
+Zero console errors in all supported browsers.
+Zero console warnings (no deprecation warnings, no passive event listener warnings, no mixed content warnings).
+All event listeners must use { passive: true } where appropriate, or { passive: false } explicitly when preventDefault() is called.
+🏗️ SECTION 2: CODE ARCHITECTURE & QUALITY REQUIREMENTS
+Code Organization (within the single file): The code must be clearly organized into labeled sections using prominent comment blocks:
+
+<!-- ============================================ -->
+<!-- SECTION: META & HEAD                         -->
+<!-- ============================================ -->
+
+<!-- ============================================ -->
+<!-- SECTION: CSS STYLES                          -->
+<!-- ============================================ -->
+
+<!-- ============================================ -->
+<!-- SECTION: HTML STRUCTURE                      -->
+<!-- ============================================ -->
+
+<!-- ============================================ -->
+<!-- SECTION: JAVASCRIPT — CONFIGURATION          -->
+<!-- ============================================ -->
+
+<!-- SECTION: JAVASCRIPT — UTILITY FUNCTIONS      -->
+<!-- SECTION: JAVASCRIPT — AUDIO ENGINE           -->
+<!-- SECTION: JAVASCRIPT — INPUT HANDLING         -->
+<!-- SECTION: JAVASCRIPT — GAME ENTITIES          -->
+<!-- SECTION: JAVASCRIPT — PARTICLE SYSTEM        -->
+<!-- SECTION: JAVASCRIPT — COLLISION DETECTION    -->
+<!-- SECTION: JAVASCRIPT — GAME STATE MANAGEMENT  -->
+<!-- SECTION: JAVASCRIPT — RENDERING ENGINE       -->
+<!-- SECTION: JAVASCRIPT — UI & SCREENS           -->
+<!-- SECTION: JAVASCRIPT — MAIN GAME LOOP         -->
+<!-- SECTION: JAVASCRIPT — INITIALIZATION         -->
+Coding Standards:
+
+Clean, readable, well-indented code with meaningful variable and function names (no single-letter variables except loop counters).
+Comprehensive comments explaining each major function, algorithm, and design decision.
+Use const and let exclusively — no var.
+Use modern ES6+ features: arrow functions, template literals, destructuring, spread operators, classes, Map/Set where appropriate.
+No global namespace pollution — use an IIFE, module pattern, or class-based encapsulation.
+All magic numbers must be defined as named constants in a configuration object at the top.
+Proper error handling with try/catch blocks around localStorage, AudioContext, and any APIs that may fail.
+Performance Targets:
+
+Solid 60 FPS on mid-range devices (2020 Android phone, 2018 laptop).
+Use requestAnimationFrame for the game loop — never setInterval or setTimeout for rendering.
+Implement delta-time-based movement so game speed is independent of frame rate.
+Object pooling for frequently created/destroyed entities (bullets, particles, enemies) — minimize garbage collection.
+Efficient rendering: only redraw what's changed when possible, use canvas.width clearing sparingly, batch similar draw operations.
+Minimal DOM manipulation during gameplay — all game rendering via Canvas.
+Throttle resize handlers and non-critical calculations.
+Keep the main loop lean: no allocations, no string concatenation, no complex calculations that can be pre-computed.
+Memory Management:
+
+Implement object pools for all particle systems, projectiles, and temporary entities.
+Clean up event listeners, intervals, and timeouts when transitioning between game states.
+No memory leaks from circular references or detached DOM nodes.
+Array recycling: reuse arrays instead of creating new ones each frame.
+🎮 SECTION 3: GAMEPLAY & DESIGN REQUIREMENTS
+Game Identity — BE CREATIVE AND UNIQUE:
+
+The game must have a unique, creative concept — not a basic clone of Snake, Flappy Bird, or Pong.
+It should combine mechanics in an interesting way or present a fresh twist on a genre.
+Suggested unique concepts (choose one or create something even better):
+"Gravity Shift Arena" — A platformer where you control gravity direction to navigate through procedurally generated obstacle courses while collecting time-extending orbs.
+"Chromatic Collapse" — A puzzle-action hybrid where colored blocks rain down and you must match, chain, and combo them using physics-based throwing mechanics.
+"Echo Dash" — A runner where your past selves replay alongside you and you must avoid colliding with your own echoes while collecting fragments.
+"Orbit Weaver" — You control a planet and must gravitationally capture orbiting moons while avoiding asteroids, building increasingly complex orbital systems.
+"Pulse" — A rhythm-based survival game where the arena expands and contracts to a beat, and enemies move in musical patterns you must learn and exploit.
+Or invent something entirely new that would make a player say "I've never seen this before."
+Instant Playability:
+
+Total load time from file open to interactive menu: under 1 second.
+No loading bars, no splash screens longer than 500ms, no mandatory tutorials.
+The player must understand the core mechanic within the first 5 seconds of gameplay through intuitive design and minimal on-screen hints (show controls briefly on first play).
+Required Game Screens & States:
+
+Start Screen / Main Menu:
+
+Game title with stylish, animated presentation (CSS animations or canvas-drawn).
+"PLAY" button (large, obvious, satisfying to click/tap).
+Brief tagline or one-sentence description of the objective.
+High score display (from localStorage, if available).
+Simple animated background or preview of gameplay to create atmosphere.
+Optional: "HOW TO PLAY" button showing a minimal overlay with controls.
+Optional: Sound ON/OFF toggle.
+Active Gameplay State:
+
+Clean, non-intrusive HUD showing: current score, high score, level/wave (if applicable), and any relevant stats.
+Smooth, responsive controls with zero perceptible input lag.
+Clear visual and audio feedback for every player action (movement, collection, damage, scoring).
+Progressive difficulty curve — game gets harder over time in a fair, learnable way.
+Satisfying "game feel" — screen shake on impacts, particle effects on achievements, smooth transitions.
+Pause State:
+
+Triggered by pressing Escape, P, or tapping a pause button on mobile.
+Clearly overlay that dims the game and shows "PAUSED" with resume and restart options.
+Game loop continues but game logic is frozen (animations can continue subtly).
+Game Over Screen:
+
+Clear "GAME OVER" message with final score prominently displayed.
+"NEW HIGH SCORE!" celebration if applicable (with particle effects/animation).
+"PLAY AGAIN" button (instantly restarts — no reloading).
+"MAIN MENU" button.
+Score summary: final score, high score, time survived, or other relevant stats.
+Smooth State Transitions:
+
+Fade, slide, or animated transitions between all states — no jarring instant switches.
+Minimum 300ms transition time for visual polish.
+Scoring & Progression:
+
+Clear, incrementing score system that the player always understands.
+Combo/multiplier system for skilled play (optional but strongly encouraged).
+Persistent high score saved to localStorage (with graceful fallback).
+Difficulty progression: at least 3 noticeable difficulty stages as the game progresses (e.g., faster enemies, new enemy types, reduced safe zones, new mechanics introduced).
+The game should have a "one more try" factor — the player should feel they can always do better.
+Visual Polish Requirements:
+
+Cohesive color palette (define 5-7 colors that work together; no random colors).
+Particle system for: explosions, collections, trails, ambient effects (minimum 4 different particle effect types).
+Screen shake for impactful events (with decreasing intensity, not nauseating).
+Smooth animations for UI elements (easing functions, not linear).
+Visual juice: entities should squash/stretch, pulse, glow, or bounce for game feel.
+Background: not a plain color — use gradient, animated particles, grid, parallax layers, or subtle patterns.
+Professional-looking text rendering: proper font sizes, shadows, outlines for readability against any background.
+All visual elements must be resolution-independent (scale with canvas size).
+Audio Polish Requirements (Web Audio API):
+
+Background music: A simple procedurally generated ambient loop (can be a repeating pattern of tones/chords, generative music using oscillators). Must be pleasant and not annoying on loop. Start only after first user interaction (browser autoplay policy compliance).
+Sound effects for at minimum:
+Player action/movement
+Scoring/collecting
+Damage/death
+Button clicks/UI interactions
+Level up/progression milestone
+Combo/multiplier activation
+All sounds generated via Web Audio API using OscillatorNode, GainNode, and optional effects (BiquadFilterNode, ConvolverNode, etc.).
+Proper AudioContext initialization on first user gesture (click/tap).
+Master volume control and mute toggle accessible from all screens.
+Sounds must be short, satisfying, and non-annoying — think retro/synth aesthetic.
+Controls — Must Support ALL Input Methods:
+
+Keyboard (Desktop):
+
+Arrow keys AND/OR WASD for movement.
+Space for primary action (jump/shoot/select).
+Enter for menu confirmations.
+Escape/P for pause.
+All key bindings shown on first play.
+Mouse (Desktop):
+
+Click for buttons and menu interaction.
+Optional: mouse movement for aiming/control if genre-appropriate.
+Visible cursor changes on interactive elements.
+Touch (Mobile):
+
+Large, accessible touch targets (minimum 44x44px per Apple guidelines).
+Virtual joystick or intuitive swipe-based movement.
+Tap for primary action.
+All controls visible as translucent overlays that don't obscure critical gameplay.
+Multi-touch support if the game requires simultaneous movement and action.
+📋 SECTION 4: CRAZYGAMES COMPLIANCE CHECKLIST
+The generated game must pass ALL of these checks:
+
+ Single HTML file, no external resources
+ Under 50MB file size
+ No external SDKs or third-party scripts
+ No ads or ad placeholders
+ No external links (<a href> pointing outside)
+ No login/authentication
+ No Terms & Conditions or Privacy Policy text
+ No popups, redirects, or forced navigation
+ No window.open(), window.location changes, or window.top access
+ No alert(), confirm(), or prompt()
+ No console errors or warnings
+ Works in Chrome, Firefox, Edge, Safari
+ Works on desktop and mobile
+ Responsive design with proper viewport meta tag
+ Touch controls functional on mobile
+ Runs inside an iframe without issues
+ No domain-specific restrictions
+ Gameplay starts quickly (under 3 seconds to interactive)
+ Has a clear game loop with start, play, game over, restart
+ No offensive, violent (gore), sexual, or controversial content
+ Game is family-friendly and suitable for all ages
+🎨 SECTION 5: AESTHETIC & THEME GUIDELINES
+Choose a cohesive visual theme: Neon/Cyberpunk, Minimalist Geometric, Retro Pixel-Style (drawn via canvas, not pixel fonts), Nature/Organic, Space/Cosmic, Abstract/Artistic, or Pastel/Cute.
+The theme should be consistently applied across ALL screens (menu, gameplay, game over).
+UI design should feel modern and polished — rounded corners, subtle shadows, smooth hover effects, consistent spacing.
+The game should look like it was made by a professional indie studio, not a coding tutorial.
+📐 SECTION 6: MATHEMATICAL & SYSTEMS REQUIREMENTS
+Implement proper delta-time game loop: const deltaTime = (currentTime - lastTime) / 1000;
+Use vector math for movement: implement at minimum Vector2 class or utility functions (add, subtract, multiply, normalize, magnitude, distance, lerp, dot product).
+Implement AABB or circle-based collision detection (appropriate for entity shapes).
+Use easing functions for animations: at minimum easeInOut
